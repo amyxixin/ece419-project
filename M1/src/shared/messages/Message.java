@@ -14,6 +14,7 @@ public class Message implements KVMessage{
         this.value = value;
         this.statusType = statusType;
         this.serializedMsg = String.format("%s,%s,%s", key, value, statusType);
+
     }
 
     @Override
