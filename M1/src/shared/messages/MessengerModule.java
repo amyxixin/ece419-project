@@ -22,7 +22,7 @@ public class MessengerModule {
     private InputStream input;
     private OutputStream output;
 
-    public MessengerModule(Socket clientSocket) throws Exception{
+    public MessengerModule(Socket clientSocket) throws IOException{
         this.clientSocket = clientSocket;
         this.output = clientSocket.getOutputStream();
         this.input = clientSocket.getInputStream();
