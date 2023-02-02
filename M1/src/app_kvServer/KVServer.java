@@ -46,9 +46,10 @@ public class KVServer implements IKVServer {
 
     public KVServer(int port, int cacheSize, String strategy) {
         this.port = port;
-        this.cacheSize = cacheSize;
-        this.cacheStrategy = CacheStrategy.valueOf(strategy);
+//        this.cacheSize = cacheSize;
+//        this.cacheStrategy = CacheStrategy.valueOf(strategy);
         this.initStorage();
+        this.run();
     }
 
     @Override
@@ -297,14 +298,15 @@ public class KVServer implements IKVServer {
     public static void main(String[] args) {
         try {
             new LogSetup("logs/server.log", Level.ALL);
-            if(args.length != 1) {
+
+            if(args.length != 3) {
                 System.out.println("Error! Invalid number of arguments!");
                 System.out.println("Usage: Server <port>!");
             } else {
                 int port = Integer.parseInt(args[0]);
                 int cacheSize = Integer.parseInt(args[1]);
                 String strategy = args[2];
-                KVServer server = new KVServer(port, cacheSize, strategy);
+                new KVServer(port, cacheSize, strategy);
             }
         } catch (IOException e) {
             System.out.println("Error! Unable to initialize logger!");
