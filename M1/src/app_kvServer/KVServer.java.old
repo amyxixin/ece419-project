@@ -3,13 +3,14 @@ package app_kvServer;
 import logging.LogSetup;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import app_kvServer.ClientConnection;
+import server.ClientConnection;
+import server.Server;
 
 import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Properties;
 
 public class KVServer implements IKVServer {
@@ -33,22 +34,45 @@ public class KVServer implements IKVServer {
     private int cacheSize;
     private CacheStrategy cacheStrategy;
 
-    /* data size is the maximum byte length of a key value pair.
-        key max size = 20 Bytes
-        value max size = 120 kBytes
-       also need to store the size of existing value as Integer = 4 bytes
-     */
-    private static final Integer dataSize = 4 + 20 + 120000;
-    // no concurrent exception, can't use null key or value
-    static HashMap<String, Long> idx = new HashMap<String, Long>();
+    /* database attributes */
     private String dbPath= "database.dat";
-    private String idxPath = "hash.idx";
+    private ConcurrentHashMap<String, String> db;
 
     public KVServer(int port, int cacheSize, String strategy) {
         this.port = port;
         this.cacheSize = cacheSize;
         this.cacheStrategy = CacheStrategy.valueOf(strategy);
-        this.initStorage();
+        this.initDB();
+    }
+
+    public void initDB() {
+        File dbFile = new File(dbPath);
+        if (dbFile.isFile()) {
+            try {
+                FileInputStream in = new FileInputStream(dbPath);
+                Properties prop = new Properties();
+                prop.load(in);
+
+                for (String key : prop.stringPropertyNames()) {
+                    this.db.put(key, prop.get(key).toString());
+                }
+                logger.info("Loaded data from database file " + dbPath);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("Error loading database file! " + e.getMessage());
+                logger.debug("Error loading database file! " + e);
+            }
+        } else {
+            try {
+                dbFile.createNewFile();
+                this.db = new ConcurrentHashMap<String, String>();
+                logger.info("Created new database file at " + dbPath);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("Error creating database file! " + e.getMessage());
+                logger.debug("Error creating database file! " + e);
+            }
+        }
     }
 
     @Override
@@ -73,7 +97,7 @@ public class KVServer implements IKVServer {
 
     @Override
     public boolean inStorage(String key){
-        return this.idx.containsKey(key);
+        return this.db.containsKey(key);
     }
 
     @Override
@@ -86,62 +110,14 @@ public class KVServer implements IKVServer {
 
     @Override
     public String getKV(String key) throws Exception{
-        if (inStorage(key)) {
-            Long begin = this.idx.get(key);
-            try {
-                RandomAccessFile f = new RandomAccessFile(dbPath, "r");
-                f.seek(begin);
-                int valSize = f.readInt();
-                byte[] value = new byte[valSize];
-                f.read(value, (int)(begin+4+20), valSize);
-                f.close();
-                logger.info("Complete getting data from key " + key);
-                return new String(value);
-
-            } catch (Exception e) {
-                logger.error("Error getting data from database! " + e.getMessage());
-            }
-        } else {
-            logger.error("Error accessing non-existent key."); // is this a real error? or we just return null?
-        }
-
-        this.save();
-        return null;
+        logger.info("Retrieving value from key.");
+        return this.db.get(key);
     }
 
     @Override
     public void putKV(String key, String value) throws Exception{
-        Long begin = idx.get(key);
-        try {
-            RandomAccessFile f = new RandomAccessFile(dbPath, "rw");
-
-            if (begin == null) {
-                // new data added to end of file
-                begin = f.length();
-            }
-
-            if (value.equals("")) { // change how delete is handled
-                this.idx.remove(key);
-                f.close();
-                logger.info("Complete delete data from key " + key);
-                return;
-            }
-
-            this.idx.put(key, begin);
-            f.seek(begin);
-            f.writeInt(value.length());
-            f.writeBytes(key);
-            f.seek(begin+4+20);
-            f.writeBytes(value);
-            f.close();
-
-            logger.info("Complete write data to key " + key);
-
-        } catch (Exception e) {
-            logger.error("Error writing to database! " + e.getMessage());
-        }
-
-        this.save();
+        logger.info("Put new value for key " + key);
+        this.db.put(key, value);
     }
 
     @Override
@@ -152,68 +128,25 @@ public class KVServer implements IKVServer {
     @Override
     public void clearStorage(){
         File dbFile = new File(dbPath);
-        File idxFile = new File(idxPath);
         try {
             dbFile.delete();
-            idxFile.delete();
-            this.initStorage();
-            logger.info("Cleared storage files.");
+            initDB();
+            logger.info("Cleared database file at " + dbPath);
         } catch (Exception e){
-            logger.error("Error clearing storage files: " + e.getMessage());
-        }
-    }
-
-    public void initStorage() {
-        File dbFile = new File(dbPath);
-        File idxFile = new File(idxPath);
-
-        // If no existing database file, create one
-        if (!dbFile.isFile()) {
-            try {
-                dbFile.createNewFile();
-                logger.info("Created new database file at: " + dbPath);
-            } catch (IOException e) {
-                logger.error("Error creating database! " + e.getMessage());
-                logger.error("Error creating database! " + e);
-            }
-        }
-
-        if (idxFile.isFile()){
-            try {
-                FileInputStream in = new FileInputStream(idxPath);
-                Properties prop = new Properties();
-                prop.load(in);
-                for (String key : prop.stringPropertyNames()) {
-                    this.idx.put(key, Long.parseLong(prop.getProperty(key)));
-                }
-                logger.info("Loaded index file.");
-                in.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                logger.error("Error loading index file! " + e.getMessage());
-                logger.debug("Error loading index file! " + e);
-            }
-        } else {
-            try {
-                idxFile.createNewFile();
-                logger.info("Created new index file at: " + idxPath);
-            } catch (IOException e) {
-                logger.error("Error creating index file! " + e.getMessage());
-                logger.error("Error creating index file! " + e);
-            }
+            logger.info("Error clearing database file at " + dbPath);
         }
     }
 
     @Override
     public void run(){
-        this.running = initializeServer();
+        running = initializeServer();
 
         if(serverSocket != null) {
             while(isRunning()){
                 try {
                     Socket client = serverSocket.accept();
                     ClientConnection connection =
-                            new ClientConnection(client, this); // TODO: check if this is correct!
+                            new ClientConnection(client);
                     new Thread(connection).start();
 
                     logger.info("Connected to "
@@ -245,22 +178,18 @@ public class KVServer implements IKVServer {
         }
     }
 
-    public void save(){
-        try {
-            FileOutputStream out = new FileOutputStream(idxPath);
-            Properties prop = new Properties();
-            prop.putAll(this.idx);
-            prop.store(out, null);
-            out.close();
-        } catch (Exception e) {
-            logger.error("Error saving index file: " + e.getMessage());
-        }
-    }
-
     @Override
     public void kill(){
         this.running = false;
-        this.save();
+        try {
+            FileOutputStream out = new FileOutputStream(this.dbPath);
+            Properties prop = new Properties();
+            prop.putAll(this.db);
+            prop.store(out, null);
+        } catch (Exception e) {
+            logger.error("Error saving database to file!");
+            throw new RuntimeException(e);
+        }
         try {
             serverSocket.close();
             logger.info("Server killed.");
@@ -273,7 +202,15 @@ public class KVServer implements IKVServer {
     @Override
     public void close(){
         this.running = false;
-        this.save();
+        try {
+            FileOutputStream out = new FileOutputStream(this.dbPath);
+            Properties prop = new Properties();
+            prop.putAll(this.db);
+            prop.store(out, null);
+        } catch (Exception e) {
+            logger.error("Error saving database to file!");
+            throw new RuntimeException(e);
+        }
         try {
             serverSocket.close();
             logger.info("Server closed.");
@@ -291,9 +228,7 @@ public class KVServer implements IKVServer {
                 System.out.println("Usage: Server <port>!");
             } else {
                 int port = Integer.parseInt(args[0]);
-                int cacheSize = Integer.parseInt(args[1]);
-                String strategy = args[2];
-                KVServer server = new KVServer(port, cacheSize, strategy);
+                new Server(port).start();
             }
         } catch (IOException e) {
             System.out.println("Error! Unable to initialize logger!");
