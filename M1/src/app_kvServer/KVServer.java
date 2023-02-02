@@ -1,6 +1,6 @@
 package app_kvServer;
 
-import logging.LogSetup;
+import logger.LogSetup;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import app_kvServer.ClientConnection;
@@ -85,11 +85,17 @@ public class KVServer implements IKVServer {
     private boolean isRunning() { return this.running; }
 
     @Override
-    public String getKV(String key) throws Exception{
+    public String getKV(String key) throws IllegalArgumentException, IOException{
         if (inStorage(key)) {
             Long begin = this.idx.get(key);
             try {
                 RandomAccessFile f = new RandomAccessFile(dbPath, "r");
+
+                if (key.length() == 0 || key.length() >= 20){
+                    logger.error("Key has wrong length!");
+                    throw new IllegalArgumentException("Key has wrong length!!");
+                }
+
                 f.seek(begin);
                 int valSize = f.readInt();
                 byte[] value = new byte[valSize];
@@ -98,19 +104,19 @@ public class KVServer implements IKVServer {
                 logger.info("Complete getting data from key " + key);
                 return new String(value);
 
-            } catch (Exception e) {
+            } catch (IOException e) {
                 logger.error("Error getting data from database! " + e.getMessage());
+                throw new IOException("Error getting data from database!");
             }
         } else {
-            logger.error("Error accessing non-existent key."); // is this a real error? or we just return null?
-        }
 
-        this.save();
-        return null;
+            logger.error("Error accessing non-existent key.");
+            throw new IllegalArgumentException("Key does not exist in database!");
+        }
     }
 
     @Override
-    public void putKV(String key, String value) throws Exception{
+    public void putKV(String key, String value) throws IllegalArgumentException, IOException {
         Long begin = idx.get(key);
         try {
             RandomAccessFile f = new RandomAccessFile(dbPath, "rw");
@@ -120,7 +126,12 @@ public class KVServer implements IKVServer {
                 begin = f.length();
             }
 
-            if (value.equals("")) { // change how delete is handled
+            if (key.length() == 0 || key.length() >= 20 || value.length() >= 120000){
+                logger.error("Key or value has wrong length!");
+                throw new IllegalArgumentException("Key or value has wrong length!!");
+            }
+
+            if (value.equals("")) {
                 this.idx.remove(key);
                 f.close();
                 logger.info("Complete delete data from key " + key);
@@ -137,10 +148,10 @@ public class KVServer implements IKVServer {
 
             logger.info("Complete write data to key " + key);
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error("Error writing to database! " + e.getMessage());
+            throw new IOException("Error writing to database!");
         }
-
         this.save();
     }
 
@@ -213,7 +224,7 @@ public class KVServer implements IKVServer {
                 try {
                     Socket client = serverSocket.accept();
                     ClientConnection connection =
-                            new ClientConnection(client, this); // TODO: check if this is correct!
+                            new ClientConnection(client, this);
                     new Thread(connection).start();
 
                     logger.info("Connected to "
