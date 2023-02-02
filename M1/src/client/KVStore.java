@@ -1,5 +1,6 @@
 package client;
 
+import java.io.IOException;
 import java.net.Socket;
 
 import java.util.HashSet;
@@ -7,11 +8,17 @@ import shared.messages.KVMessage;
 import shared.messages.Message;
 import shared.messages.KVMessage.StatusType;
 import shared.messages.MessengerModule;
+import app_kvClient.IClientSocketListener;
+import app_kvClient.IClientSocketListener.SocketStatus;
 
 public class KVStore extends Thread implements KVCommInterface {
 	private String KVServerAddress;
 	private int KVServerPort;
 	private MessengerModule msgModule;
+	private Socket clientSocket;
+	private boolean running;
+	
+	HashSet<IClientSocketListener> listeners;
 	
 	/**
 	 * Initialize KVStore with address and port of KVServer
@@ -21,19 +28,18 @@ public class KVStore extends Thread implements KVCommInterface {
 	public KVStore(String address, int port) {
 		// set the address and port 
 		this.KVServerAddress = address;
-		this.KVServerPort = port;
-		listeners = new HashSet<ClientSocketListener>();
+		this.KVServerPort = port; 
+		listeners = new HashSet<IClientSocketListener>();
 	}
 
 	/* creates a socket and connects it to the server */ 
 	@Override
 	public void connect() throws Exception {
-		ClientSocket = new Socket(this.KVServerAddress, this.KVServerPort);
-		this.msgModule = MessengerModule(ClientSocket);
+		clientSocket = new Socket(this.KVServerAddress, this.KVServerPort);
+		this.msgModule = new MessengerModule(clientSocket);
 		setRunning(true);
 		logger.info("Connection established");
 	}
-
 	/**
 	 * Initializes and starts the client connection. 
 	 * Loops until the connection is closed or aborted by the client.
@@ -43,7 +49,7 @@ public class KVStore extends Thread implements KVCommInterface {
 			while(isRunning()) {
 				try {
 					String latestMsg = this.msgModule.receiveMessage().getMsg();
-					for(ClientSocketListener listener : listeners) {
+					for(IClientSocketListener listener : listeners) {
 						listener.handleNewMessage(latestMsg);
 					}
 				} catch (IOException ioe) {
@@ -51,7 +57,7 @@ public class KVStore extends Thread implements KVCommInterface {
 						logger.error("Connection lost!");
 						try {
 							tearDownConnection();
-							for(ClientSocketListener listener : listeners) {
+							for(IClientSocketListener listener : listeners) {
 								listener.handleStatus(
 										SocketStatus.CONNECTION_LOST);
 							}
@@ -66,7 +72,7 @@ public class KVStore extends Thread implements KVCommInterface {
 			
 		} finally {
 			if(isRunning()) {
-				closeConnection();
+				disconnect();
 			}
 		}
 	}
@@ -77,7 +83,7 @@ public class KVStore extends Thread implements KVCommInterface {
 		
 		try {
 			tearDownConnection();
-			for(ClientSocketListener listener : listeners) {
+			for(IClientSocketListener listener : listeners) {
 				listener.handleStatus(SocketStatus.DISCONNECTED);
 			}
 		} catch (IOException ioe) {
@@ -103,7 +109,7 @@ public class KVStore extends Thread implements KVCommInterface {
 		running = run;
 	}
 
-	public void addListener(ClientSocketListener listener){
+	public void addListener(IClientSocketListener listener){
 		listeners.add(listener);
 	}
 
@@ -113,11 +119,7 @@ public class KVStore extends Thread implements KVCommInterface {
 	 */
 	@Override
 	public KVMessage put(String key, String value) throws Exception {
-		if(isValidKey(key)){
-			Message msg = new Message(key, value, StatusType.PUT);
-		} else{
-			Message msg = new Message("error: the key is invalid. The key cannot contain space and cannot be empty", null, StatusType.PUT_ERROR);
-		}
+		Message msg = new Message(key, value, StatusType.PUT);
 		msgModule.sendMessage(msg);
 		Message receiveMsg = msgModule.receiveMessage();
 		return receiveMsg;
@@ -129,27 +131,9 @@ public class KVStore extends Thread implements KVCommInterface {
 	 */
 	@Override
 	public KVMessage get(String key) throws Exception {
-		if(isValidKey(key)){
-			Message msg = new Message(key, value, StatusType.GET);
-		} else{
-			Message msg = new Message("error: the key is invalid. The key cannot contain space and cannot be empty", null, StatusType.GET_ERROR);
-		}
+		Message msg = new Message(key, "", StatusType.GET);
 		msgModule.sendMessage(msg);
 		Message receiveMsg = msgModule.receiveMessage();
 		return receiveMsg;
-	}
-
-	/*
-	 * return false if the key contains space or the key is empty
-	 * return true otherwise
-	 */
-	private boolean isValidKey(String key){
-		if(key.contains(' ')){
-			return false;
-		}
-		if(key.isEmpty()){
-			return false;
-		}
-		return true;
 	}
 }

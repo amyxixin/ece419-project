@@ -1,6 +1,6 @@
 package app_kvClient;
 
-public interface ClientSocketListener {
+public interface IClientSocketListener {
 
 	public enum SocketStatus{CONNECTED, DISCONNECTED, CONNECTION_LOST};
 	

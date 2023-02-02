@@ -1,22 +1,24 @@
 package app_kvClient;
 
-import client.ClientSocketListener;
+import logger.LogSetup;
+import shared.messages.KVMessage;
+import shared.messages.Message;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
 import client.KVCommInterface;
 import client.KVStore;
-import logger.LogSetup;
-import shared.messages.Message;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import logger.LogSetup;
 
-public class KVClient implements IKVClient, ClientSocketListener {
-    
-	private static Logger logger = Logger.getRootLogger(); 
-    private KVStore client = null;
+public class KVClient implements IKVClient, IClientSocketListener {
+	private static Logger logger = Logger.getRootLogger();
+	private KVStore client = null;
 	private static final String PROMPT = "KVClient> ";
 	private boolean stop = false;
 	private BufferedReader stdin;
@@ -27,7 +29,7 @@ public class KVClient implements IKVClient, ClientSocketListener {
     public void newConnection(String hostname, int port) throws Exception{
         this.client = new KVStore(hostname, port);
 		this.client.addListener(this);
-        this.client.connect()
+        this.client.connect();
     }
 
     @Override
@@ -38,11 +40,11 @@ public class KVClient implements IKVClient, ClientSocketListener {
     
 	public void run() {
 		while(!stop) {
-			stdin = new BufferedReader(new InputStreamReader(System.in));
+			this.stdin = new BufferedReader(new InputStreamReader(System.in));
 			System.out.print(PROMPT);
 			
 			try {
-				String cmdLine = stdin.readLine();
+				String cmdLine = this.stdin.readLine();
 				this.handleCommand(cmdLine);
 			} catch (IOException e) {
 				stop = true;
@@ -56,7 +58,7 @@ public class KVClient implements IKVClient, ClientSocketListener {
 
 		if(tokens[0].equals("quit")) {	
 			stop = true;
-			disconnect();
+			this.client.disconnect();
 			System.out.println(PROMPT + "Application exit!");
 		
 		} else if (tokens[0].equals("connect")){
@@ -64,14 +66,14 @@ public class KVClient implements IKVClient, ClientSocketListener {
 				try{
 					serverAddress = tokens[1];
 					serverPort = Integer.parseInt(tokens[2]);
-					connect(serverAddress, serverPort);
+					newConnection(serverAddress, serverPort);
 				} catch(NumberFormatException nfe) {
 					printError("No valid address. Port must be a number!");
 					logger.info("Unable to parse argument <port>", nfe);
 				} catch (UnknownHostException e) {
 					printError("Unknown Host!");
 					logger.info("Unknown Host!", e);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					printError("Could not establish connection!");
 					logger.warn("Could not establish connection!", e);
 				}
@@ -86,24 +88,24 @@ public class KVClient implements IKVClient, ClientSocketListener {
                 if (this.client!= null && this.client.isRunning()){
 					String inputKey = tokens[1];
 					/* all inputs starting from token[2] are appended to inputValue */ 
-					String subTokenArray = Arrays.copyOfRange(tokens, 2, tokens.length);
-					String inputValue = subTokenArray.join('');
+					String[] subTokenArray = Arrays.copyOfRange(tokens, 2, tokens.length);
+					String inputValue = String.join( " ", subTokenArray);
 					try {
 						KVMessage receiveMsg = this.client.put(inputKey, inputValue);
-						this.handleNewMessage(receiveMsg.getMsg);
+						this.handleNewMessage(receiveMsg.getMsg());
 					}
-					catch{
-						printError(error: "Unable to perform put");
+					catch (Exception e){
+						printError("Unable to perform put");
 						this.client.disconnect();
 					}
 				}
 				else{
-					this.printError(error: "Client not connected.");
+					this.printError("Client not connected.");
 				}
 				
             }
             else {
-                this.printError(error: "Invalid number of parameters. Usage: put <key> <value>.");
+                this.printError("Invalid number of parameters. Usage: put <key> <value>.");
             }
 		
 		} else if (tokens[0].equals("get")){
@@ -114,23 +116,23 @@ public class KVClient implements IKVClient, ClientSocketListener {
 					String inputKey = tokens[1];
 					try {
 						KVMessage receiveMsg = this.client.get(inputKey);
-						this.handleNewMessage(receiveMsg.getMsg);
+						this.handleNewMessage(receiveMsg.getMsg());
 					}
-					catch{
-						printError(error: "Unable to perform get");
+					catch (Exception e) {
+						printError("Unable to perform get");
 						this.client.disconnect();
 					}
 				}
 				else{
-					this.printError(error: "Client not connected.");
+					this.printError("Client not connected.");
 				}
 				
             }
             else {
-                this.printError(error: "Invalid number of parameters. Usage: put <key> <value>.");
+                this.printError("Invalid number of parameters. Usage: put <key> <value>.");
             }
 		} else if(tokens[0].equals("disconnect")) {
-			disconnect();
+			this.client.disconnect();
 			
 		} else if(tokens[0].equals("logLevel")) {
 			if(tokens.length == 2) {
@@ -244,8 +246,8 @@ public class KVClient implements IKVClient, ClientSocketListener {
 	@Override
 	public void handleNewMessage(String msg) {
 		if(!stop) {
-			System.out.println(msg);
 			System.out.print(PROMPT);
+			System.out.println(msg);
 		}
 	}
 	
@@ -265,7 +267,6 @@ public class KVClient implements IKVClient, ClientSocketListener {
 		}
 		
 	}
-
 }
 
 	
