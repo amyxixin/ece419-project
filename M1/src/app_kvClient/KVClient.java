@@ -41,7 +41,6 @@ public class KVClient implements IKVClient, IClientSocketListener {
         while(!stop) {
             this.stdin = new BufferedReader(new InputStreamReader(System.in));
             System.out.print(PROMPT);
-
             try {
                 String cmdLine = this.stdin.readLine();
                 this.handleCommand(cmdLine);
@@ -66,6 +65,10 @@ public class KVClient implements IKVClient, IClientSocketListener {
                     serverAddress = tokens[1];
                     serverPort = Integer.parseInt(tokens[2]);
                     newConnection(serverAddress, serverPort);
+                    if (this.client.isRunning()){
+                        System.out.println(PROMPT +
+                                "Connected");
+                    }
                 } catch(NumberFormatException nfe) {
                     printError("No valid address. Port must be a number!");
                     logger.info("Unable to parse argument <port>", nfe);
@@ -82,16 +85,19 @@ public class KVClient implements IKVClient, IClientSocketListener {
 
         } else if (tokens[0].equals("put")){
             /* get put command abd send out put request */
-            if(tokens.length >= 3) {
-                /* parameter length should be >= 3 for PUT request */
+            if(tokens.length >= 2) {
+                /* parameter length should be >= 2 for PUT request */
                 if (this.client!= null && this.client.isRunning()){
                     String inputKey = tokens[1];
+                    String inputValue = "";
                     /* all inputs starting from token[2] are appended to inputValue */
-                    String[] subTokenArray = Arrays.copyOfRange(tokens, 2, tokens.length);
-                    String inputValue = String.join( " ", subTokenArray);
+                    if (tokens.length > 2) {
+                        String[] subTokenArray = Arrays.copyOfRange(tokens, 2, tokens.length);
+                        inputValue = String.join(" ", subTokenArray);
+                    }
                     try {
                         KVMessage receiveMsg = this.client.put(inputKey, inputValue);
-                        this.handleNewMessage(receiveMsg.getMsg());
+                        this.handleNewMessage(receiveMsg);
                     }
                     catch (Exception e){
                         printError("Unable to perform put");
@@ -104,7 +110,7 @@ public class KVClient implements IKVClient, IClientSocketListener {
 
             }
             else {
-                this.printError("Invalid number of parameters. Usage: put <key> <value>.");
+                this.printError("Invalid number of parameters. Usage: put <key> <value> or put <key> to delete.");
             }
 
         } else if (tokens[0].equals("get")){
@@ -115,7 +121,7 @@ public class KVClient implements IKVClient, IClientSocketListener {
                     String inputKey = tokens[1];
                     try {
                         KVMessage receiveMsg = this.client.get(inputKey);
-                        this.handleNewMessage(receiveMsg.getMsg());
+                        this.handleNewMessage(receiveMsg);
                     }
                     catch (Exception e) {
                         printError("Unable to perform get");
@@ -163,8 +169,12 @@ public class KVClient implements IKVClient, IClientSocketListener {
         sb.append("::::::::::::::::::::::::::::::::\n");
         sb.append(PROMPT).append("connect <host> <port>");
         sb.append("\t establishes a connection to a server\n");
-        sb.append(PROMPT).append("send <text message>");
-        sb.append("\t\t sends a text message to the server \n");
+        sb.append(PROMPT).append("put <key> <value>");
+        sb.append("\t\t puts a key value pair to the server \n");
+        sb.append(PROMPT).append("put <key>");
+        sb.append("\t\t deletes a key value pair from the server with <key>\n");
+        sb.append(PROMPT).append("get <key>");
+        sb.append("\t\t gets the value of the <key> stored in the server\n");
         sb.append(PROMPT).append("disconnect");
         sb.append("\t\t\t disconnects from the server \n");
 
@@ -184,6 +194,7 @@ public class KVClient implements IKVClient, IClientSocketListener {
         System.out.println(PROMPT
                 + "ALL | DEBUG | INFO | WARN | ERROR | FATAL | OFF");
     }
+
     /*
      * set logger to specified log level
      * level: One of the following log4j log levels:
@@ -225,7 +236,6 @@ public class KVClient implements IKVClient, IClientSocketListener {
         System.out.println(PROMPT + "Error! " +  error);
     }
 
-
     /**
      * Main entry point for the KVServer application.
      * @param args contains the port number at args[0].
@@ -243,10 +253,10 @@ public class KVClient implements IKVClient, IClientSocketListener {
     }
 
     @Override
-    public void handleNewMessage(String msg) {
+    public void handleNewMessage(KVMessage msg) {
         if(!stop) {
             System.out.print(PROMPT);
-            System.out.println(msg);
+            System.out.println(msg.getMsg());
         }
     }
 

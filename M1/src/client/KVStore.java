@@ -52,7 +52,7 @@ public class KVStore extends Thread implements KVCommInterface {
 		try {
 			while(isRunning()) {
 				try {
-					String latestMsg = this.msgModule.receiveMessage().getMsg();
+					KVMessage latestMsg = this.msgModule.receiveMessage();
 					for(IClientSocketListener listener : listeners) {
 						listener.handleNewMessage(latestMsg);
 					}
