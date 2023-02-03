@@ -6,6 +6,8 @@ import client.KVStore;
 import junit.framework.TestCase;
 import shared.messages.KVMessage;
 import shared.messages.KVMessage.StatusType;
+import shared.messages.Message;
+import shared.messages.MessengerModule;
 
 
 public class InteractionTest extends TestCase {

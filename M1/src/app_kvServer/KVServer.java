@@ -110,7 +110,6 @@ public class KVServer implements IKVServer {
                 throw new IOException("Error getting data from database!");
             }
         } else {
-
             logger.error("Error accessing non-existent key.");
             throw new IllegalArgumentException("Key does not exist in database!");
         }

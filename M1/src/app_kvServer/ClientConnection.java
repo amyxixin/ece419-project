@@ -115,8 +115,10 @@ public class ClientConnection implements Runnable {
             String value = this.server.getKV(key);
             return new Message(key, value, StatusType.GET_SUCCESS);
 
-        } catch(Exception e){
-            return new Message(key, null, StatusType.GET_ERROR);
+        } catch(IOException e){
+            return new Message(key, "Database Error! Please try again later.", StatusType.GET_ERROR);
+        } catch(IllegalArgumentException e){
+            return new Message(key, "Key Error! Key doesn't exist or key exceeds 20 character limit.", StatusType.GET_ERROR);
         }
 
     }
@@ -132,8 +134,12 @@ public class ClientConnection implements Runnable {
 
         try{
             this.server.putKV(key, value);
-        } catch(Exception e){
+        } catch(IllegalArgumentException e){
             statusType = StatusType.PUT_ERROR;
+            value = "Key or value has wrong length! Key must be under 20 character and value must be under 120,000 character.";
+        } catch(IOException e){
+            statusType = StatusType.PUT_ERROR;
+            value = "Database Error! Please try again later.";
         }
 
         return new Message(key, value, statusType);
