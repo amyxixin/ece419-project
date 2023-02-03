@@ -1,0 +1,13 @@
+2023-02-03 11:27:30,800 INFO  [main] root: Loaded index file.
+2023-02-03 11:27:30,800 INFO  [main] root: Initialize server ...
+2023-02-03 11:27:30,807 INFO  [main] root: Server listening on port: 8000
+2023-02-03 11:28:04,572 INFO  [main] root: Connected to localhost on port 54743
+2023-02-03 11:30:26,441 INFO  [main] root: Connected to localhost on port 54777
+2023-02-03 11:31:05,898 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:54743>: 'dfa,,GET'
+2023-02-03 11:31:05,899 ERROR [Thread-0] root: Error accessing non-existent key.
+2023-02-03 11:31:05,902 INFO  [Thread-0] root: SEND 	<127.0.0.1:54743>: 'dfa,Key Error! Key doesn't exist or key exceeds 20 character limit.,GET_ERROR'
+2023-02-03 11:31:13,157 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:54743>: 'test,value,PUT'
+2023-02-03 11:31:13,158 INFO  [Thread-0] root: Complete write data to key test
+2023-02-03 11:31:13,174 ERROR [Thread-0] root: Error saving index file: class java.lang.Long cannot be cast to class java.lang.String (java.lang.Long and java.lang.String are in module java.base of loader 'bootstrap')
+2023-02-03 11:31:13,174 INFO  [Thread-0] root: SEND 	<127.0.0.1:54743>: 'test,value,PUT_SUCCESS'
+2023-02-03 11:31:50,219 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:54743>: 'test,,GET'
