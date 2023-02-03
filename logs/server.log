@@ -1,0 +1,88 @@
+2023-02-03 11:27:30,800 INFO  [main] root: Loaded index file.
+2023-02-03 11:27:30,800 INFO  [main] root: Initialize server ...
+2023-02-03 11:27:30,807 INFO  [main] root: Server listening on port: 8000
+2023-02-03 11:28:04,572 INFO  [main] root: Connected to localhost on port 54743
+2023-02-03 11:30:26,441 INFO  [main] root: Connected to localhost on port 54777
+2023-02-03 11:31:05,898 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:54743>: 'dfa,,GET'
+2023-02-03 11:31:05,899 ERROR [Thread-0] root: Error accessing non-existent key.
+2023-02-03 11:31:05,902 INFO  [Thread-0] root: SEND 	<127.0.0.1:54743>: 'dfa,Key Error! Key doesn't exist or key exceeds 20 character limit.,GET_ERROR'
+2023-02-03 11:31:13,157 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:54743>: 'test,value,PUT'
+2023-02-03 11:31:13,158 INFO  [Thread-0] root: Complete write data to key test
+2023-02-03 11:31:13,174 ERROR [Thread-0] root: Error saving index file: class java.lang.Long cannot be cast to class java.lang.String (java.lang.Long and java.lang.String are in module java.base of loader 'bootstrap')
+2023-02-03 11:31:13,174 INFO  [Thread-0] root: SEND 	<127.0.0.1:54743>: 'test,value,PUT_SUCCESS'
+2023-02-03 11:31:50,219 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:54743>: 'test,,GET'
+2023-02-03 11:50:24,053 INFO  [main] root: Loaded index file.
+2023-02-03 11:50:24,054 INFO  [main] root: Initialize server ...
+2023-02-03 11:50:24,070 INFO  [main] root: Server listening on port: 8000
+2023-02-03 11:51:02,636 INFO  [main] root: Connected to localhost on port 51035
+2023-02-03 11:51:05,688 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51035>: '123,123,PUT'
+2023-02-03 11:51:05,690 INFO  [Thread-0] root: Complete write data to key 123
+2023-02-03 11:51:05,715 ERROR [Thread-0] root: Error saving index file: class java.lang.Long cannot be cast to class java.lang.String (java.lang.Long and java.lang.String are in module java.base of loader 'bootstrap')
+2023-02-03 11:51:05,724 INFO  [Thread-0] root: SEND 	<127.0.0.1:51035>: '123,123,PUT_SUCCESS'
+2023-02-03 12:01:13,385 INFO  [main] root: Loaded index file.
+2023-02-03 12:01:13,387 INFO  [main] root: Initialize server ...
+2023-02-03 12:01:13,402 INFO  [main] root: Server listening on port: 8000
+2023-02-03 12:01:42,762 INFO  [main] root: Connected to localhost on port 51059
+2023-02-03 12:01:49,101 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51059>: '123,123,PUT'
+2023-02-03 12:01:49,103 INFO  [Thread-0] root: Complete write data to key 123
+2023-02-03 12:01:49,127 ERROR [Thread-0] root: Error saving index file: class java.lang.Long cannot be cast to class java.lang.String (java.lang.Long and java.lang.String are in module java.base of loader 'bootstrap')
+2023-02-03 12:01:49,137 INFO  [Thread-0] root: SEND 	<127.0.0.1:51059>: '123,123,PUT_SUCCESS'
+2023-02-03 12:01:56,406 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51059>: '123,234,PUT'
+2023-02-03 12:01:56,410 INFO  [Thread-0] root: Complete write data to key 123
+2023-02-03 12:01:56,410 ERROR [Thread-0] root: Error saving index file: class java.lang.Long cannot be cast to class java.lang.String (java.lang.Long and java.lang.String are in module java.base of loader 'bootstrap')
+2023-02-03 12:01:56,412 INFO  [Thread-0] root: SEND 	<127.0.0.1:51059>: '123,234,PUT_UPDATE'
+2023-02-03 12:03:55,448 INFO  [main] root: Loaded index file.
+2023-02-03 12:03:55,450 INFO  [main] root: Initialize server ...
+2023-02-03 12:03:55,462 INFO  [main] root: Server listening on port: 8000
+2023-02-03 12:04:01,440 INFO  [main] root: Connected to localhost on port 51061
+2023-02-03 12:04:10,585 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51061>: '123,123,PUT'
+2023-02-03 12:04:10,588 INFO  [Thread-0] root: Complete write data to key 123
+2023-02-03 12:04:10,610 ERROR [Thread-0] root: Error saving index file: class java.lang.Long cannot be cast to class java.lang.String (java.lang.Long and java.lang.String are in module java.base of loader 'bootstrap')
+2023-02-03 12:04:10,618 INFO  [Thread-0] root: SEND 	<127.0.0.1:51061>: '123,123,PUT_SUCCESS'
+2023-02-03 12:21:14,622 INFO  [main] root: Loaded index file.
+2023-02-03 12:21:14,623 INFO  [main] root: Initialize server ...
+2023-02-03 12:21:14,639 INFO  [main] root: Server listening on port: 8000
+2023-02-03 12:21:25,579 INFO  [main] root: Connected to localhost on port 51100
+2023-02-03 12:21:27,874 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51100>: '123,123,PUT'
+2023-02-03 12:21:27,876 INFO  [Thread-0] root: Complete write data to key 123
+2023-02-03 12:21:27,911 INFO  [Thread-0] root: SEND 	<127.0.0.1:51100>: '123,123,PUT_SUCCESS'
+2023-02-03 12:21:50,781 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51100>: '123,,GET'
+2023-02-03 12:24:01,975 INFO  [main] root: Loaded index file.
+2023-02-03 12:24:01,976 INFO  [main] root: Initialize server ...
+2023-02-03 12:24:01,990 INFO  [main] root: Server listening on port: 8000
+2023-02-03 12:24:16,459 INFO  [main] root: Connected to localhost on port 51144
+2023-02-03 12:24:18,726 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51144>: '123,123,PUT'
+2023-02-03 12:24:18,729 INFO  [Thread-0] root: Complete write data to key 123
+2023-02-03 12:24:18,763 INFO  [Thread-0] root: SEND 	<127.0.0.1:51144>: '123,123,PUT_UPDATE'
+2023-02-03 12:24:23,444 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51144>: '123,,GET'
+2023-02-03 12:24:23,448 INFO  [Thread-0] root: Complete getting data from key 123
+2023-02-03 12:24:23,449 INFO  [Thread-0] root: SEND 	<127.0.0.1:51144>: '123,123,GET_SUCCESS'
+2023-02-03 12:24:42,465 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51144>: '123,234,PUT'
+2023-02-03 12:24:42,469 INFO  [Thread-0] root: Complete write data to key 123
+2023-02-03 12:24:42,472 INFO  [Thread-0] root: SEND 	<127.0.0.1:51144>: '123,234,PUT_UPDATE'
+2023-02-03 12:26:41,275 INFO  [main] root: Loaded index file.
+2023-02-03 12:26:41,276 INFO  [main] root: Initialize server ...
+2023-02-03 12:26:41,289 INFO  [main] root: Server listening on port: 8000
+2023-02-03 12:27:26,447 INFO  [main] root: Connected to localhost on port 51151
+2023-02-03 12:27:38,485 INFO  [main] root: Connected to localhost on port 51152
+2023-02-03 12:27:50,974 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51151>: '123,123,PUT'
+2023-02-03 12:27:50,977 INFO  [Thread-0] root: Complete write data to key 123
+2023-02-03 12:27:51,009 INFO  [Thread-0] root: SEND 	<127.0.0.1:51151>: '123,123,PUT_UPDATE'
+2023-02-03 12:27:55,040 INFO  [Thread-1] root: RECEIVE 	<127.0.0.1:51152>: '123,234,PUT'
+2023-02-03 12:27:55,042 INFO  [Thread-1] root: Complete write data to key 123
+2023-02-03 12:27:55,044 INFO  [Thread-1] root: SEND 	<127.0.0.1:51152>: '123,234,PUT_UPDATE'
+2023-02-03 12:28:08,945 INFO  [Thread-1] root: RECEIVE 	<127.0.0.1:51152>: '123,,GET'
+2023-02-03 12:28:08,948 INFO  [Thread-1] root: Complete getting data from key 123
+2023-02-03 12:28:08,949 INFO  [Thread-1] root: SEND 	<127.0.0.1:51152>: '123,234,GET_SUCCESS'
+2023-02-03 12:28:15,772 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51151>: '123,,GET'
+2023-02-03 12:28:15,773 INFO  [Thread-0] root: Complete getting data from key 123
+2023-02-03 12:28:15,774 INFO  [Thread-0] root: SEND 	<127.0.0.1:51151>: '123,234,GET_SUCCESS'
+2023-02-03 12:29:14,342 INFO  [Thread-1] root: RECEIVE 	<127.0.0.1:51152>: '234,234,PUT'
+2023-02-03 12:29:14,346 INFO  [Thread-1] root: Complete write data to key 234
+2023-02-03 12:29:14,349 INFO  [Thread-1] root: SEND 	<127.0.0.1:51152>: '234,234,PUT_SUCCESS'
+2023-02-03 12:29:14,573 INFO  [Thread-0] root: RECEIVE 	<127.0.0.1:51151>: '234,,GET'
+2023-02-03 12:29:14,573 INFO  [Thread-0] root: Complete getting data from key 234
+2023-02-03 12:29:14,574 INFO  [Thread-0] root: SEND 	<127.0.0.1:51151>: '234,234,GET_SUCCESS'
+2023-02-03 12:41:52,874 INFO  [main] root: Loaded index file.
+2023-02-03 12:41:52,875 INFO  [main] root: Initialize server ...
+2023-02-03 12:41:52,894 INFO  [main] root: Server listening on port: 8000
