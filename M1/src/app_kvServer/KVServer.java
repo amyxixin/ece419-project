@@ -40,7 +40,7 @@ public class KVServer implements IKVServer {
      */
     private static final Integer dataSize = 4 + 20 + 120000;
     // no concurrent exception, can't use null key or value
-    static HashMap<String, Long> idx = new HashMap<String, Long>();
+    static HashMap<String, String> idx = new HashMap<String, String>();
     private String dbPath= "database.dat";
     private String idxPath = "hash.idx";
 
@@ -74,7 +74,7 @@ public class KVServer implements IKVServer {
 
     @Override
     public boolean inStorage(String key){
-        return this.idx.containsKey(key);
+        return idx.containsKey(key);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class KVServer implements IKVServer {
     @Override
     public String getKV(String key) throws IllegalArgumentException, IOException{
         if (inStorage(key)) {
-            Long begin = this.idx.get(key);
+            long begin = Long.parseLong(idx.get(key));
             try {
                 RandomAccessFile f = new RandomAccessFile(dbPath, "r");
 
@@ -100,7 +100,8 @@ public class KVServer implements IKVServer {
                 f.seek(begin);
                 int valSize = f.readInt();
                 byte[] value = new byte[valSize];
-                f.read(value, (int)(begin+4+20), valSize);
+                f.seek(begin+4+20);
+                f.readFully(value);
                 f.close();
                 logger.info("Complete getting data from key " + key);
                 return new String(value);
@@ -117,13 +118,16 @@ public class KVServer implements IKVServer {
 
     @Override
     public void putKV(String key, String value) throws IllegalArgumentException, IOException {
-        Long begin = idx.get(key);
+        String valIndex = idx.get(key);
+        long begin;
         try {
             RandomAccessFile f = new RandomAccessFile(dbPath, "rw");
 
-            if (begin == null) {
+            if (valIndex==null) {
                 // new data added to end of file
                 begin = f.length();
+            } else {
+                begin = Long.parseLong(valIndex);
             }
 
             if (key.length() == 0 || key.length() >= 20 || value.length() >= 120000){
@@ -132,13 +136,13 @@ public class KVServer implements IKVServer {
             }
 
             if (value.equals("")) {
-                this.idx.remove(key);
+                idx.remove(key);
                 f.close();
                 logger.info("Complete delete data from key " + key);
                 return;
             }
 
-            this.idx.put(key, begin);
+            idx.put(key, String.valueOf(begin));
             f.seek(begin);
             f.writeInt(value.length());
             f.writeBytes(key);
@@ -195,7 +199,7 @@ public class KVServer implements IKVServer {
                 Properties prop = new Properties();
                 prop.load(in);
                 for (String key : prop.stringPropertyNames()) {
-                    this.idx.put(key, Long.parseLong(prop.getProperty(key)));
+                    idx.put(key, prop.getProperty(key));
                 }
                 logger.info("Loaded index file.");
                 in.close();
