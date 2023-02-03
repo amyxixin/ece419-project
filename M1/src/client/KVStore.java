@@ -2,16 +2,20 @@ package client;
 
 import java.io.IOException;
 import java.net.Socket;
-
 import java.util.HashSet;
+import org.apache.log4j.Logger;
 import shared.messages.KVMessage;
 import shared.messages.Message;
 import shared.messages.KVMessage.StatusType;
 import shared.messages.MessengerModule;
 import app_kvClient.IClientSocketListener;
 import app_kvClient.IClientSocketListener.SocketStatus;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+import logger.LogSetup;
 
 public class KVStore extends Thread implements KVCommInterface {
+	private static Logger logger = Logger.getRootLogger();
 	private String KVServerAddress;
 	private int KVServerPort;
 	private MessengerModule msgModule;
@@ -67,9 +71,6 @@ public class KVStore extends Thread implements KVCommInterface {
 					}
 				}				
 			}
-		} catch (IOException ioe) {
-			logger.error("Connection could not be established!");
-			
 		} finally {
 			if(isRunning()) {
 				disconnect();

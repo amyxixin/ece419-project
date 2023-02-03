@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="echoServer">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/M0/echoServer/echoServer.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

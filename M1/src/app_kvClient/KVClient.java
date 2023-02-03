@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import logger.LogSetup;
 
 public class KVClient implements IKVClient, IClientSocketListener {
 	private static Logger logger = Logger.getRootLogger();

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.10.13
+Created-By: 19.0.2 (Homebrew)
+built-by: kathy
+Main-Class: app_kvServer.KVServer
+Class-Path: ${project.classpath}
+
